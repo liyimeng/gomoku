@@ -9,10 +9,11 @@ import java.util.Map;
 
 public class Util {
 
-	public static Map<String, String> parseQuery(String requestLine) {
+	public static Map<String, String> parseQuery(String uri) {
+		System.out.println(uri);
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 		try {
-			URL url = new URL("http", "0.0.0.0", requestLine);
+			URL url = new URL("http", "0.0.0.0", uri);
 			String query = url.getQuery();
 			if (query != null ) {
 				String[] pairs = query.split("&");

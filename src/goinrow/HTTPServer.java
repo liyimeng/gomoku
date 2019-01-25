@@ -139,8 +139,8 @@ public class HTTPServer {
 			if (target.startsWith("/create")) {
 				this.server.create(request, response, context);
 				return;
-			} else if (target.startsWith("/join")) {
-				this.server.join(request, response, context);
+			} else if (target.startsWith("/game")) {
+				this.server.game(request, response, context);
 				return;
 
 			} else if (target.startsWith("/run")) {

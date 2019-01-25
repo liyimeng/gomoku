@@ -8,7 +8,7 @@ public class Game implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Board board;
-	private Player.Role active;
+	private Board.Role active;
 	private String created;
 	private String desc;
 	
@@ -18,11 +18,11 @@ public class Game implements java.io.Serializable {
 		created =  new Timestamp(System.currentTimeMillis()).toString();
 	}
 	
-	public void setActiveRole(Player.Role r) {
+	public void setActiveRole(Board.Role r) {
 		this.active = r;
 	}
 	
-	public Player.Role getActiveRole() {
+	public Board.Role getActiveRole() {
 		return active;
 	}
 	String getDesc() {
