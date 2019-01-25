@@ -1,0 +1,19 @@
+<style>
+table {
+  border: 0.5px solid black;
+  border-collapse: collapse;
+}
+
+td {
+  padding: 2px;
+  text-align: center;
+  vertical-align: center;
+  border: 0.5px solid black;
+  width: 32px;
+  height: 32px;
+  font-size:	18pt;
+  font-family: Arial;
+}
+
+td:hover {background-color:#5965ff;}
+</style>
