@@ -143,10 +143,6 @@ public class HTTPServer {
 				this.server.game(request, response, context);
 				return;
 
-			} else if (target.startsWith("/run")) {
-				this.server.run(request, response, context);
-				return;
-
 			} else if (target.startsWith("/room")) {
 				this.server.room(request, response, context);
 				return;

@@ -38,7 +38,7 @@ public class GameServer {
 		String gTable = "<div align=center><table><tr><th>Description</th><th> Created </th><th> Link </th></tr>";
 		for (Integer k : allGames.keySet()) {
 			g = allGames.get(k);
-			gTable += String.format("<tr><td>%s</td><td>%s</td><td> <a href=join?g=%d>Join</a></td></tr>", g.getDesc(),
+			gTable += String.format("<tr><td>%s</td><td>%s</td><td> <a href=/game?g=%d&r=X>Join</a></td></tr>", g.getDesc(),
 					g.getCreated(), k);
 		}
 		gTable += "</table></div>";
@@ -62,7 +62,7 @@ public class GameServer {
 			 * EntityUtils.toByteArray(entity); } System.out.println(new String(data));
 			 */
 			String html = "<html><head> <link rel='stylesheet' href=board.css></head><body>%s</body></html>";
-			Map<String, String> params = Util.parseQuery(request.getRequestLine().toString());
+			Map<String, String> params = Util.parseQuery(request.getRequestLine().getUri());
 			int X = Integer.parseInt(params.get("X"));
 			int Y = Integer.parseInt(params.get("Y"));
 			int K = Integer.parseInt(params.get("K"));
@@ -89,7 +89,9 @@ public class GameServer {
 				return;
 			} else if (params.get("opponent").equals("private")) {
 				g.setActiveRole(Board.Role.BOB);
-				html = String.format(html, String.format("Please copy this link and send to your friend: <a href=/game?g=%d&r=%s>Join my game!</a>", g.hashCode(), Board.Role.BOB));
+				html = String.format(html, String.format("Game created.<a href=/game?g=%d&r=%s>Host</a> <a href=/game?g=%d&r=%s>Opponent</a>",
+						g.hashCode(), Board.Role.ALICE.getRole(),
+						g.hashCode(), Board.Role.BOB.getRole()));
 				response.setStatusCode(HttpStatus.SC_OK);
 				entity = new NStringEntity(html, ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
@@ -116,7 +118,8 @@ public class GameServer {
 	public void game(final HttpRequest request, final HttpResponse response, final HttpContext context)
 			throws HttpException {
 
-		String html = "<html><head> <link rel='stylesheet' href=board.css></head><body><div>%s</div>%s</body></html>";
+		String html = "<html><head> <link rel='stylesheet' href=board.css> %s </head><body><div>%s</div>%s</body></html>";
+		final String refresh = "<meta http-equiv='Refresh' content=10>";
 		Map<String, String> params = Util.parseQuery(request.getRequestLine().getUri());
 		Game g = null;
 		try {
@@ -128,12 +131,21 @@ public class GameServer {
 		if (g == null) {
 			response.setStatusCode(HttpStatus.SC_NOT_FOUND);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "<h1>Game not found!</h1>", "<a href=/>Home</a>"),
+					String.format(html, "", "<h1>Game not found!</h1>", "<a href=/>Home</a>"),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		}
-
+		
+		if (g.getBoard().hasWinner()) {
+			response.setStatusCode(HttpStatus.SC_OK);
+			final NStringEntity entity = new NStringEntity(
+					String.format(html, "", "<h1>Game is Over!</h1>", g.getBoard().render()),
+					ContentType.create("text/html", "UTF-8"));
+			response.setEntity(entity);
+			return;
+		}
+		
 		Board.Role player = Board.Role.ALICE;
 		if (!player.getRole().equals(params.get("r")))
 			player = Board.Role.BOB;
@@ -141,7 +153,7 @@ public class GameServer {
 		if (g.getActiveRole() != player) {
 			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "Please wait for your turn!", g.getBoard().render()),
+					String.format(html, refresh, "Please wait for your turn!", g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
@@ -169,35 +181,27 @@ public class GameServer {
 		}
 		if (!played) {
 			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-			final NStringEntity entity = new NStringEntity(String.format(html, msg, g.getBoard().renderForPlay(player, g.hashCode())),
+			final NStringEntity entity = new NStringEntity(String.format(html, "", msg, g.getBoard().renderForPlay(player, g.hashCode())),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		}
 		
-		if (g.getBoard().winAt(x, y)) {
+		if (g.getBoard().hasWinner()) {
 			response.setStatusCode(HttpStatus.SC_OK);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "<h1>You win!</h1>", g.getBoard().render()),
+					String.format(html, "", "<h1>You win!</h1>", g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		} else {
 			response.setStatusCode(HttpStatus.SC_OK);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, msg, g.getBoard().render()),
+					String.format(html, refresh, msg, g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		}
-	}
-
-	public void run(final HttpRequest request, final HttpResponse response, final HttpContext context)
-			throws HttpException {
-		response.setStatusCode(HttpStatus.SC_OK);
-		final NStringEntity entity = new NStringEntity("<html><body><h1>Play your turn!</h1></body></html>",
-				ContentType.create("text/html", "UTF-8"));
-		response.setEntity(entity);
 	}
 
 	public void staticFile(final HttpRequest request, final HttpResponse response, final HttpContext context)

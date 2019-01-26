@@ -9,11 +9,12 @@ public class Board implements java.io.Serializable {
 
 	private int maxX, maxY, win;
 	private Role[][] boardTable;
-
+	private boolean hasWinner;
 	public Board(int maxX, int maxY, int win) {
 		this.maxX = maxX;
 		this.maxY = maxY;
 		this.win = win;
+		this.hasWinner = false;
 		this.boardTable = new Role[maxX][maxY];
 		for (int x = 0; x < maxX; x++) {
 			for (int y = 0; y < maxY; y++) {
@@ -27,10 +28,14 @@ public class Board implements java.io.Serializable {
 			return false;
 		}
 		boardTable[x][y] = m;
+		hasWinner = winAt(x,y);
 		return true;
 	}
-	public boolean winAt(int X, int Y) {
-		int x = 0, y = 0,  count = 0;
+	public boolean hasWinner() {
+		return hasWinner;
+	}
+	private boolean winAt(int X, int Y) {
+		int x = 0, y = 0,  count = 1;
 		// Horizon -
 		// check forward
 		x = X;
