@@ -42,7 +42,7 @@ import org.apache.http.protocol.ResponseServer;
  * Simple HTTP/1.1 server based on a non-blocking I/O model and capable
  * of direct channel (zero copy) data transfer.
  */
-public class HTTPServer {
+public class GameServer {
 	ConcurrentHashMap<Integer, Game> gameStore;
 	public static void main(final String[] args) throws Exception {
 		int port = 8080;
@@ -56,10 +56,10 @@ public class HTTPServer {
                 System.out.println("nothing is should be saved before jvm shutdown");
             }
         });
-       new HTTPServer().start( port, "./static");
+       new GameServer().start( port, "./static");
 	}
 	
-	public HTTPServer() {
+	public GameServer() {
 		gameStore = new ConcurrentHashMap<Integer, Game>();
 	}
 	public void start(int port, String docRoot) {
