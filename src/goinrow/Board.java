@@ -46,12 +46,12 @@ public class Board implements java.io.Serializable {
 			return true;
 		// check backward
 		x = X;
-		while (x > 1 && boardTable[X][Y] == boardTable[--x][Y] && count < win) {
+		while (x > 0 && boardTable[X][Y] == boardTable[--x][Y] && count < win) {
 			count++;
 		}
 
 		// Vertical |
-
+		count = 1;
 		// check forward
 		y = Y;
 		while (y < maxY - 1 && boardTable[X][Y] == boardTable[X][++y] && count < win) {
@@ -61,16 +61,17 @@ public class Board implements java.io.Serializable {
 			return true;
 		// check backward
 		y = Y;
-		while (y > 1 && boardTable[X][Y] == boardTable[X][--y] && count < win) {
+		while (y > 0 && boardTable[X][Y] == boardTable[X][--y] && count < win) {
 			count++;
 		}
 		if (count >= 5)
 			return true;
 		// Slash /
+		count = 1;
 		// check forward
 		x =X;
 		y= Y;
-		while (x < maxX - 1 && y > 1 && boardTable[X][Y] == boardTable[++x][--y] && count < win) {
+		while (x < maxX - 1 && y > 0 && boardTable[X][Y] == boardTable[++x][--y] && count < win) {
 			count++;
 		}
 		if (count >= 5)
@@ -78,13 +79,14 @@ public class Board implements java.io.Serializable {
 		// check backward
 		x =X;
 		y= Y;
-		while (y < maxY - 1 && x > 1 && boardTable[X][Y] == boardTable[--x][++y] && count < win) {
+		while (y < maxY - 1 && x > 0 && boardTable[X][Y] == boardTable[--x][++y] && count < win) {
 			count++;
 		}
 		if (count >= 5)
 			return true;
 
 		// Back slash \
+		count = 1;
 		// check forward
 		x =X;
 		y= Y;
@@ -96,7 +98,7 @@ public class Board implements java.io.Serializable {
 		// check backward
 		x =X;
 		y= Y;
-		while (y > 1 && x > 1 && boardTable[X][Y] == boardTable[--x][--y] && count < win) {
+		while (y > 0 && x > 0 && boardTable[X][Y] == boardTable[--x][--y] && count < win) {
 			count++;
 		}
 		if (count >= 5)
