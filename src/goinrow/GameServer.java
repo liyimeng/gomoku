@@ -1,7 +1,12 @@
 package goinrow;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,18 +55,69 @@ public class GameServer {
 			port = Integer.parseInt(args[0]);
 		}
 		
+		final GameServer gs = new GameServer();
 		//register a shutdown hook for cleaning up
 		Runtime.getRuntime().addShutdownHook(new Thread() {//
             public void run() {
-                System.out.println("nothing is should be saved before jvm shutdown");
+               gs.saveGames();
             }
         });
-       new GameServer().start( port, "./static");
+       gs.start( port, "./static");
 	}
 	
+	
 	public GameServer() {
-		gameStore = new ConcurrentHashMap<Integer, Game>();
+		loadGames();
 	}
+	
+	protected void saveGames() {
+		System.out.println("nothing is should be saved before jvm shutdown");
+		// Saving of object in a file
+		try {
+			FileOutputStream file;
+			file = new FileOutputStream("games.db");
+			ObjectOutputStream out = new ObjectOutputStream(file);
+			// Method for serialization of object
+			out.writeObject(gameStore);
+			out.close();
+			file.close();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+		}
+		System.out.println("Object has been serialized");
+	}
+	
+	private void loadGames() {
+		System.out.println("nothing is should be saved before jvm shutdown");
+		// Saving of object in a file
+		try {
+			// Reading the object from a file 
+            FileInputStream file = new FileInputStream("games.db"); 
+            ObjectInputStream in = new ObjectInputStream(file); 
+            // Method for deserialization of object 
+            gameStore = (ConcurrentHashMap<Integer, Game>)in.readObject(); 
+            in.close(); 
+            file.close(); 
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		if (gameStore == null ) {
+			gameStore = new ConcurrentHashMap<Integer, Game>();
+		}
+		System.out.println("Games has been loaded");
+	}
+	
+	
+	
 	public void start(int port, String docRoot) {
 		// Create HTTP protocol processing chain
 		HttpProcessor httpproc = HttpProcessorBuilder.create().add(new ResponseDate())
@@ -106,11 +162,8 @@ public class GameServer {
 			System.out.println("Server listens at: " + String.valueOf(port));
 			// Ready to go!
 			ioReactor.execute(ioEventDispatch);
-		} catch (InterruptedIOException ex) {
-			System.err.println("Interrupted");
-		} catch (IOException e) {
+		}  catch (IOException e) {
 			System.err.println("I/O error: " + e.getMessage());
 		}
-		System.out.println("Shutdown");
 	}
 }
