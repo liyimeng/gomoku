@@ -120,14 +120,15 @@ public class Board implements java.io.Serializable {
 		 return html;
 	 }
 	
-	 public String renderForPlay(Role r, int gid) {
+	 public String renderForPlay(Role r, String gid,String token) {
 		 String html = "<table>";
 		 String tmp;
-		 for (int y=0; y < maxY; y++) {
+		 
+		  for (int y=0; y < maxY; y++) {
 			 html += "<tr>";
 			 for (int x = 0 ; x < maxX; x++){
 				if (this.boardTable[x][y] == Role.EMPTY) {
-					 tmp = String.format("<td><a href=/game?g=%d&x=%d&y=%d&r=%s>.</a></td>", gid, x, y, r.getRole());
+					 tmp = String.format("<td><a href=/play?g=%s&x=%d&y=%d&r=%s&t=%s>.</a></td>", gid, x, y, r.getRole(), token);
 				}else {
 					tmp = String.format("<td>%s</td>", boardTable[x][y].getRole());						 
 				}

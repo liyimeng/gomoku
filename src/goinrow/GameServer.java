@@ -10,6 +10,8 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
@@ -48,7 +50,10 @@ import org.apache.http.protocol.ResponseServer;
  * of direct channel (zero copy) data transfer.
  */
 public class GameServer {
-	ConcurrentHashMap<Integer, Game> gameStore;
+	private final static Logger LOGGER = Logger.getLogger( GameServer.class.getName());
+	ConcurrentHashMap<String, Game> gameStore;
+	private String docRoot = "./static";
+	private String dbFile = "games.db";
 	public static void main(final String[] args) throws Exception {
 		int port = 8080;
 		if (args.length >= 1) {
@@ -62,20 +67,23 @@ public class GameServer {
                gs.saveGames();
             }
         });
-       gs.start( port, "./static");
+       gs.start( port );
 	}
 	
 	
 	public GameServer() {
+		// get the global logger to configure it
+        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+        logger.setLevel(Level.INFO);
 		loadGames();
 	}
 	
 	protected void saveGames() {
-		System.out.println("nothing is should be saved before jvm shutdown");
+		LOGGER.info("Save games before jvm shutdown");
 		// Saving of object in a file
 		try {
 			FileOutputStream file;
-			file = new FileOutputStream("games.db");
+			file = new FileOutputStream(dbFile);
 			ObjectOutputStream out = new ObjectOutputStream(file);
 			// Method for serialization of object
 			out.writeObject(gameStore);
@@ -87,18 +95,18 @@ public class GameServer {
 			e.printStackTrace();
 		} catch (IOException e) {
 		}
-		System.out.println("Object has been serialized");
+		LOGGER.info("Game saved.");
 	}
 	
 	private void loadGames() {
-		System.out.println("nothing is should be saved before jvm shutdown");
+		LOGGER.info("Load games from disk");
 		// Saving of object in a file
 		try {
 			// Reading the object from a file 
-            FileInputStream file = new FileInputStream("games.db"); 
+            FileInputStream file = new FileInputStream(dbFile); 
             ObjectInputStream in = new ObjectInputStream(file); 
             // Method for deserialization of object 
-            gameStore = (ConcurrentHashMap<Integer, Game>)in.readObject(); 
+            gameStore = (ConcurrentHashMap<String, Game>)in.readObject(); 
             in.close(); 
             file.close(); 
 
@@ -111,14 +119,14 @@ public class GameServer {
 			e.printStackTrace();
 		}
 		if (gameStore == null ) {
-			gameStore = new ConcurrentHashMap<Integer, Game>();
+			gameStore = new ConcurrentHashMap<String, Game>();
 		}
-		System.out.println("Games has been loaded");
+		LOGGER.info("Games have been loaded");
 	}
 	
 	
 	
-	public void start(int port, String docRoot) {
+	public void start(int port) {
 		// Create HTTP protocol processing chain
 		HttpProcessor httpproc = HttpProcessorBuilder.create().add(new ResponseDate())
 				.add(new ResponseServer("Go/1.1")).add(new ResponseContent()).add(new ResponseConnControl()).build();
@@ -126,7 +134,9 @@ public class GameServer {
 		UriHttpAsyncRequestHandlerMapper reqistry = new UriHttpAsyncRequestHandlerMapper();
 		// Register the default handler for all URIs
 		reqistry.register("/create", new CreateGameHandler(gameStore));
-		reqistry.register("/game", new PlayGameHandler(gameStore));
+		reqistry.register("/play", new PlayGameHandler(gameStore));
+		reqistry.register("/join", new JoinGameHandler(gameStore));
+		reqistry.register("/load", new LoadGameHandler(gameStore));
 		reqistry.register("/room", new GameRoomHandler(gameStore));
 		reqistry.register("/*", new StaticFileHandler(docRoot));
 		// Create server-side HTTP protocol handler
@@ -134,13 +144,13 @@ public class GameServer {
 
 			@Override
 			public void connected(final NHttpServerConnection conn) {
-				System.out.println(conn + ": connection open");
+				LOGGER.info(conn + ": connection open");
 				super.connected(conn);
 			}
 
 			@Override
 			public void closed(final NHttpServerConnection conn) {
-				System.out.println(conn + ": connection closed");
+				LOGGER.info(conn + ": connection closed");
 				super.closed(conn);
 			}
 
@@ -159,7 +169,7 @@ public class GameServer {
 			ListeningIOReactor ioReactor = new DefaultListeningIOReactor(config);
 			// Listen of the given port
 			ioReactor.listen(new InetSocketAddress(port));
-			System.out.println("Server listens at: " + String.valueOf(port));
+			LOGGER.info("Server listens at: " + String.valueOf(port));
 			// Ready to go!
 			ioReactor.execute(ioEventDispatch);
 		}  catch (IOException e) {

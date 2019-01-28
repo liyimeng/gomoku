@@ -12,27 +12,20 @@ import org.apache.http.protocol.HttpContext;
 
 public class PlayGameHandler extends GameHandler {
 
-	private final ConcurrentHashMap<Integer, Game> allGames;
-	public PlayGameHandler(ConcurrentHashMap<Integer, Game> allGames){
-		this.allGames = allGames;
+	private final ConcurrentHashMap<String, Game> allGames;
+	public PlayGameHandler(ConcurrentHashMap<String,Game> gameStore){
+		this.allGames = gameStore;
 	}
 	@Override
 	public void handleRequest(HttpRequest request, HttpResponse response, HttpContext context) {
 		// TODO Auto-generated method stub
-		String html = "<html><head> <link rel='stylesheet' href=board.css> %s </head><body><div>%s</div>%s</body></html>";
-		final String refresh = "<meta http-equiv='Refresh' content=10>";
+		String html = "<html><head> <link rel='stylesheet' href=board.css> </head><body><div align=center>%s <p>%s</p></div></body></html>";
 		Map<String, String> params = parseQuery(request);
-		Game g = null;
-		try {
-			Integer gid = Integer.parseInt(params.get("g"));
-			g = allGames.get(gid);
-		} catch (Exception e) {
-
-		}
+		Game g = allGames.get(params.get("g"));
 		if (g == null) {
 			response.setStatusCode(HttpStatus.SC_NOT_FOUND);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "", "<h1>Game not found!</h1>", "<a href=/>Home</a>"),
+					String.format(html, "<h1>Game not found!</h1>", "<a href=/>Home</a>"),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
@@ -41,66 +34,44 @@ public class PlayGameHandler extends GameHandler {
 		if (g.getBoard().hasWinner()) {
 			response.setStatusCode(HttpStatus.SC_OK);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "", "<h1>Game is Over!</h1>", g.getBoard().render()),
+					String.format(html, "<h1>Game is Over!</h1>", g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		}
 		
-		Board.Role player = Board.Role.ALICE;
-		if (!player.getRole().equals(params.get("r")))
-			player = Board.Role.BOB;
+		Board.Role player = auth(g, params, response);
+		if (player == null )
+			return;
 
 		if (g.getActiveRole() != player) {
-			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-			final NStringEntity entity = new NStringEntity(
-					String.format(html, refresh, "Please wait for your turn!", g.getBoard().render()),
-					ContentType.create("text/html", "UTF-8"));
-			response.setEntity(entity);
+			redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
 			return;
 		}
 		
-		String msg;
-		boolean played = false;
 		int x=0 , y = 0;
 		try {
 			x = Integer.parseInt(params.get("x"));
 			y = Integer.parseInt(params.get("y"));
 			if(g.getBoard().play(x, y, player)){
-				played = true;
 				if (player == Board.Role.ALICE) {
 					g.setActiveRole(Board.Role.BOB);
 				} else {
 					g.setActiveRole(Board.Role.ALICE);
 				}
-				msg = "It is opponent's turn";
-			}else {
-				msg = "Invalid play!";
 			}
 		}catch (Exception e) {
-			msg = "It's your turn, please GO!";
+			e.printStackTrace();
 		}
-		if (!played) {
-			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-			final NStringEntity entity = new NStringEntity(String.format(html, "", msg, g.getBoard().renderForPlay(player, g.hashCode())),
-					ContentType.create("text/html", "UTF-8"));
-			response.setEntity(entity);
-			return;
-		}
-		
 		if (g.getBoard().hasWinner()) {
 			response.setStatusCode(HttpStatus.SC_OK);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "", "<h1>You win!</h1>", g.getBoard().render()),
+					String.format(html, "<h1>You win!</h1>", g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
 		} else {
-			response.setStatusCode(HttpStatus.SC_OK);
-			final NStringEntity entity = new NStringEntity(
-					String.format(html, refresh, msg, g.getBoard().render()),
-					ContentType.create("text/html", "UTF-8"));
-			response.setEntity(entity);
+			redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
 			return;
 		}
 	}

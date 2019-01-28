@@ -2,6 +2,7 @@ package goinrow;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
@@ -12,16 +13,16 @@ import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 
 public class CreateGameHandler extends GameHandler {
+	private final static Logger LOGGER = Logger.getLogger( CreateGameHandler.class.getName());
 
-	private final ConcurrentHashMap<Integer, Game> allGames;
-	public CreateGameHandler(ConcurrentHashMap<Integer, Game> allGames){
+	private final ConcurrentHashMap<String, Game> allGames;
+	public CreateGameHandler(ConcurrentHashMap<String, Game> allGames){
 		this.allGames = allGames;
 	}
 	@Override
 	public void handleRequest(final HttpRequest request, final HttpResponse response, final HttpContext context) {
 		// TODO Auto-generated method stub
 		try {
-			System.out.println(request.getRequestLine().getUri());
 			HttpEntity entity = null;
 			/*
 			 * handle POST data if (request instanceof HttpEntityEnclosingRequest) { entity
@@ -36,9 +37,8 @@ public class CreateGameHandler extends GameHandler {
 			int Y = Integer.parseInt(params.get("Y"));
 			int K = Integer.parseInt(params.get("K"));
 			if (X == 0 || Y == 0 || K == 0) {
-				System.out.println("invalid board setup");
-				response.setStatusCode(HttpStatus.SC_SEE_OTHER);
-				response.setHeader("Location", "/");
+				LOGGER.warning("Invalid board setup");
+				redirectTo(response, "/");
 				return;
 			}
 			if (K < 3)
@@ -49,40 +49,41 @@ public class CreateGameHandler extends GameHandler {
 			if (Y < K + 3)
 				Y = K + 3;
 			Board b = new Board(X, Y, K);
-			Game g = new Game(b, params.get("desc"));
-			allGames.put(g.hashCode(), g);
+			Game g;
 			if (params.get("opponent").equals("computer")) {
+				g = new Game(Game.Mode.COMPUTER, b, params.get("desc"));
+				allGames.put(g.getID(), g);
 				g.setActiveRole(Board.Role.ALICE);
-				response.setStatusCode(HttpStatus.SC_SEE_OTHER);
-				response.setHeader("Location", String.format("/game?g=%d&r=%s", g.hashCode(), g.getActiveRole().getRole()));
+				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
+						Board.Role.ALICE.getRole(), 
+						g.getHostToken()) ;
+				redirectTo(response, url );
 				return;
 			} else if (params.get("opponent").equals("private")) {
+				g = new Game(Game.Mode.PRIVATE, b, params.get("desc"));
+				allGames.put(g.getID(), g);
 				g.setActiveRole(Board.Role.BOB);
-				html = String.format(html, String.format("Game created.<a href=/game?g=%d&r=%s>Host</a> <a href=/game?g=%d&r=%s>Opponent</a>",
-						g.hashCode(), Board.Role.ALICE.getRole(),
-						g.hashCode(), Board.Role.BOB.getRole()));
+				String links = String.format("Game created.<a href=/load?g=%s&r=%s&t=%s>Load game</a> <a href=/join?g=%s&r=%s>Invitation</a>",
+						g.getID(), Board.Role.ALICE.getRole(), g.getHostToken(),
+						g.getID(), Board.Role.BOB.getRole());
 				response.setStatusCode(HttpStatus.SC_OK);
-				entity = new NStringEntity(html, ContentType.create("text/html", "UTF-8"));
+				entity = new NStringEntity(String.format(html, links), ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
 				return;
 			} else if (params.get("opponent").equals("public")) {
+				g = new Game(Game.Mode.GAMEROOM, b, params.get("desc"));
+				allGames.put(g.getID(), g);
 				g.setActiveRole(Board.Role.BOB);
-				response.setStatusCode(HttpStatus.SC_SEE_OTHER);
-				response.setHeader("Location", "/room");
-				return;
-			} else {
-				System.out.println("invalid request");
-				response.setStatusCode(HttpStatus.SC_SEE_OTHER);
-				response.setHeader("Location", "/");
+				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
+						Board.Role.ALICE.getRole(), 
+						g.getHostToken()) ;
+				redirectTo(response, url );
 				return;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.setStatusCode(HttpStatus.SC_SEE_OTHER);
-			response.setHeader("Location", "/");
-			return;
 		}
-
+		redirectTo(response, "/");
 	}
 
 }

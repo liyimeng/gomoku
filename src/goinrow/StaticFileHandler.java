@@ -3,6 +3,7 @@ package goinrow;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpConnection;
 import org.apache.http.HttpRequest;
@@ -15,7 +16,7 @@ import org.apache.http.protocol.HttpCoreContext;
 
 public class StaticFileHandler extends GameHandler {
 	private File docRoot;
-
+	private final static Logger LOGGER = Logger.getLogger( CreateGameHandler.class.getName());
 	public StaticFileHandler(String root) {
 		docRoot = new File(root);
 	}
@@ -32,11 +33,11 @@ public class StaticFileHandler extends GameHandler {
 			file = new File(this.docRoot, URLDecoder.decode(target, "UTF-8"));
 			if (!file.exists()) {
 				response.setStatusCode(HttpStatus.SC_NOT_FOUND);
-				System.out.println("File " + file.getPath() + " not found");
+				LOGGER.info("File " + file.getPath() + " not found");
 
 			} else if (!file.canRead() || file.isDirectory()) {
 				response.setStatusCode(HttpStatus.SC_FORBIDDEN);
-				System.out.println("Cannot read file " + file.getPath());
+				LOGGER.info("Cannot read file " + file.getPath());
 			} else {
 
 				final HttpCoreContext coreContext = HttpCoreContext.adapt(context);
@@ -44,7 +45,7 @@ public class StaticFileHandler extends GameHandler {
 				response.setStatusCode(HttpStatus.SC_OK);
 				final NFileEntity body = new NFileEntity(file, ContentType.create("text/html"));
 				response.setEntity(body);
-				System.out.println(conn + ": serving file " + file.getPath());
+				LOGGER.info(conn + ": serving file " + file.getPath());
 			}
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block

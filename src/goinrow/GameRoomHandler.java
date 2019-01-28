@@ -11,8 +11,8 @@ import org.apache.http.protocol.HttpContext;
 
 public class GameRoomHandler extends GameHandler {
 
-	private final ConcurrentHashMap<Integer, Game> allGames;
-	public GameRoomHandler(ConcurrentHashMap<Integer, Game> allGames){
+	private final ConcurrentHashMap<String, Game> allGames;
+	public GameRoomHandler(ConcurrentHashMap<String, Game> allGames){
 		this.allGames = allGames;
 	}
 	@Override
@@ -20,9 +20,11 @@ public class GameRoomHandler extends GameHandler {
 		// TODO Auto-generated method stub
 		Game g;
 		String gTable = "<div align=center><table><tr><th>Description</th><th> Created </th><th> Link </th></tr>";
-		for (Integer k : allGames.keySet()) {
+		for (String k : allGames.keySet()) {
 			g = allGames.get(k);
-			gTable += String.format("<tr><td>%s</td><td>%s</td><td> <a href=/game?g=%d&r=X>Join</a></td></tr>", g.getDesc(),
+			if(g.getMode() != Game.Mode.GAMEROOM || g.getGuestToken() != null)
+				continue;
+			gTable += String.format("<tr><td>%s</td><td>%s</td><td> <a href=/join?g=%s&r=X>Join</a></td></tr>", g.getDesc(),
 					g.getCreated(), k);
 		}
 		gTable += "</table></div>";
