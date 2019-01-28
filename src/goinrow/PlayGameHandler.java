@@ -66,7 +66,7 @@ public class PlayGameHandler extends GameHandler {
 		if (g.getBoard().hasWinner()) {
 			response.setStatusCode(HttpStatus.SC_OK);
 			final NStringEntity entity = new NStringEntity(
-					String.format(html, "<h1>You win!</h1>", g.getBoard().render()),
+					String.format(html, "<h1>You win!</h1><a href=/>Try a new game</>", g.getBoard().render()),
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;

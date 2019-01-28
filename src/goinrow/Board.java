@@ -49,7 +49,9 @@ public class Board implements java.io.Serializable {
 		while (x > 0 && boardTable[X][Y] == boardTable[--x][Y] && count < win) {
 			count++;
 		}
-
+		if (count >= 5)
+			return true;
+		
 		// Vertical |
 		count = 1;
 		// check forward

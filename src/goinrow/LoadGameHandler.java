@@ -20,7 +20,7 @@ public class LoadGameHandler extends GameHandler {
 
 	@Override
 	public void handleRequest(HttpRequest request, HttpResponse response, HttpContext context) {
-		final String refresh = "<meta http-equiv='Refresh' content=8>";
+		final String refresh = "<meta http-equiv='Refresh' content=5>";
 		String html = "<html><head> <link rel='stylesheet' href=board.css> %s</head><body><div align=center><p>%s</p> %s</div></body></html>";
 
 		Map<String, String> params = parseQuery(request);
@@ -50,7 +50,7 @@ public class LoadGameHandler extends GameHandler {
 			if (g.getActiveRole() == player) {
 				response.setStatusCode(HttpStatus.SC_OK);
 				final NStringEntity entity = new NStringEntity(
-						String.format(html, "", "Please play your turn!",
+						String.format(html, "<title>Your turn</title>", "<h1>It is turn: " + player.getRole() + "</h1>" ,
 								g.getBoard().renderForPlay(player, g.getID(), params.get("t"))),
 						ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
@@ -58,7 +58,7 @@ public class LoadGameHandler extends GameHandler {
 			} else {
 				response.setStatusCode(HttpStatus.SC_OK);
 				final NStringEntity entity = new NStringEntity(
-						String.format(html, refresh, "Please wait for your turn!", g.getBoard().render()),
+						String.format(html, refresh, "<h1>Waiting for opponent!</h1>", g.getBoard().render()),
 						ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
 				return;

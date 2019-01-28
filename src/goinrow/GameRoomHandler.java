@@ -17,19 +17,18 @@ public class GameRoomHandler extends GameHandler {
 	}
 	@Override
 	public void handleRequest(final HttpRequest request, final HttpResponse response, final HttpContext context) {
-		// TODO Auto-generated method stub
 		Game g;
 		String gTable = "<div align=center><table><tr><th>Description</th><th> Created </th><th> Link </th></tr>";
 		for (String k : allGames.keySet()) {
 			g = allGames.get(k);
 			if(g.getMode() != Game.Mode.GAMEROOM || g.getGuestToken() != null)
 				continue;
-			gTable += String.format("<tr><td>%s</td><td>%s</td><td> <a href=/join?g=%s&r=X>Join</a></td></tr>", g.getDesc(),
+			gTable += String.format("<tr><td> %s </td><td> %s </td><td> <a href=/join?g=%s&r=X>Join</a></td></tr>", g.getDesc(),
 					g.getCreated(), k);
 		}
 		gTable += "</table></div>";
 		response.setStatusCode(HttpStatus.SC_OK);
-		String html = "<html><head> <link rel='stylesheet' href=home.css></head><body>" + gTable + "</body></html>";
+		String html = "<html><head> <link rel='stylesheet' href=home.css></head><body><h1>Tic-Tac-Toe Public Game Room</h1>" + gTable + "</body></html>";
 
 		final NStringEntity entity = new NStringEntity(html, ContentType.create("text/html", "UTF-8"));
 		response.setEntity(entity);
