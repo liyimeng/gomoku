@@ -50,10 +50,14 @@ public class CreateGameHandler extends GameHandler {
 				Y = K + 3;
 			Board b = new Board(X, Y, K);
 			Game g;
+			Board.Role active = Board.Role.ALICE;
+			if (Board.Role.BOB.getRole().equals(params.get("first"))) {
+				active = Board.Role.BOB;
+			}
 			if (params.get("opponent").equals("computer")) {
 				g = new Game(Game.Mode.COMPUTER, b, params.get("desc"));
 				allGames.put(g.getID(), g);
-				g.setActiveRole(Board.Role.ALICE);
+				g.setActiveRole(active);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
 						Board.Role.ALICE.getRole(), 
 						g.getHostToken()) ;
@@ -61,8 +65,8 @@ public class CreateGameHandler extends GameHandler {
 				return;
 			} else if (params.get("opponent").equals("private")) {
 				g = new Game(Game.Mode.PRIVATE, b, params.get("desc"));
+				g.setActiveRole(active);
 				allGames.put(g.getID(), g);
-				g.setActiveRole(Board.Role.BOB);
 				String links = String.format("Game created.<a href=/load?g=%s&r=%s&t=%s>Load game</a> <a href=/join?g=%s&r=%s>Invitation</a>",
 						g.getID(), Board.Role.ALICE.getRole(), g.getHostToken(),
 						g.getID(), Board.Role.BOB.getRole());
@@ -73,7 +77,7 @@ public class CreateGameHandler extends GameHandler {
 			} else if (params.get("opponent").equals("public")) {
 				g = new Game(Game.Mode.GAMEROOM, b, params.get("desc"));
 				allGames.put(g.getID(), g);
-				g.setActiveRole(Board.Role.BOB);
+				g.setActiveRole(active);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
 						Board.Role.ALICE.getRole(), 
 						g.getHostToken()) ;

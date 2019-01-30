@@ -28,7 +28,7 @@ public class GameRoomHandler extends GameHandler {
 		}
 		gTable += "</table></div>";
 		response.setStatusCode(HttpStatus.SC_OK);
-		String html = "<html><head> <link rel='stylesheet' href=home.css></head><body><h1>Tic-Tac-Toe Public Game Room</h1>" + gTable + "</body></html>";
+		String html = "<html><head> <link rel='stylesheet' href=home.css></head><body><div align=center><h1>Tic-Tac-Toe Public Game Room</h1>" + gTable + "</div></body></html>";
 
 		final NStringEntity entity = new NStringEntity(html, ContentType.create("text/html", "UTF-8"));
 		response.setEntity(entity);
