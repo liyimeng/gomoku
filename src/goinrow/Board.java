@@ -23,6 +23,18 @@ public class Board implements java.io.Serializable {
 		}
 	}
 
+	public int getMaxX() {
+		return maxX;
+	}
+	
+	public int getMaxY() {
+		return maxY;
+	}
+	
+	public int getMatchPoint() {
+		return win;
+	}
+	
 	public boolean play(int x, int y, Role m) {
 		if (x < 0 || x > maxX || y < 0 || y > maxY || boardTable[x][y] != Role.EMPTY) {
 			return false;
@@ -42,14 +54,12 @@ public class Board implements java.io.Serializable {
 		while (x < maxX - 1 && boardTable[X][Y] == boardTable[++x][Y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
-			return true;
 		// check backward
 		x = X;
 		while (x > 0 && boardTable[X][Y] == boardTable[--x][Y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
+		if (count >= win)
 			return true;
 		
 		// Vertical |
@@ -59,14 +69,12 @@ public class Board implements java.io.Serializable {
 		while (y < maxY - 1 && boardTable[X][Y] == boardTable[X][++y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
-			return true;
 		// check backward
 		y = Y;
 		while (y > 0 && boardTable[X][Y] == boardTable[X][--y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
+		if (count >= win)
 			return true;
 		// Slash /
 		count = 1;
@@ -76,15 +84,13 @@ public class Board implements java.io.Serializable {
 		while (x < maxX - 1 && y > 0 && boardTable[X][Y] == boardTable[++x][--y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
-			return true;
 		// check backward
 		x =X;
 		y= Y;
 		while (y < maxY - 1 && x > 0 && boardTable[X][Y] == boardTable[--x][++y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
+		if (count >= win)
 			return true;
 
 		// Back slash \
@@ -95,18 +101,14 @@ public class Board implements java.io.Serializable {
 		while (x < maxX - 1 && y < maxX - 1 && boardTable[X][Y] == boardTable[++x][++y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
-			return true;
 		// check backward
 		x =X;
 		y= Y;
 		while (y > 0 && x > 0 && boardTable[X][Y] == boardTable[--x][--y] && count < win) {
 			count++;
 		}
-		if (count >= 5)
-			return true;
-
-		return false;
+		
+		return (count >= win);
 	}
 
 	 public String render() {

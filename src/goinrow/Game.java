@@ -9,6 +9,7 @@ public class Game implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Board board;
+	private AIPlayer ai;
 	private Board.Role active;
 	private String created;
 	private String desc;
@@ -24,6 +25,7 @@ public class Game implements java.io.Serializable {
 		this.created =  new Timestamp(System.currentTimeMillis()).toString();
 		switch (this.mode) {
 		case COMPUTER:
+			ai = new AIPlayer(b);
 			hostToken = generateToken();
 			guestToken = generateToken();
 			break;
@@ -35,6 +37,9 @@ public class Game implements java.io.Serializable {
 		}
 	}
 	
+	public AIPlayer getAIPlayer() {
+		return ai;
+	}
 	private String generateToken() {
 		int t = ThreadLocalRandom.current().nextInt(1000000, 10000000);
 		return String.valueOf(t);

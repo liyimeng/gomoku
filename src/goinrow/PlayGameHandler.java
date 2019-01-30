@@ -70,10 +70,14 @@ public class PlayGameHandler extends GameHandler {
 					ContentType.create("text/html", "UTF-8"));
 			response.setEntity(entity);
 			return;
-		} else {
-			redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
-			return;
 		}
+		AIPlayer p = g.getAIPlayer();
+		if ( p != null) {
+			p.runAgainst(x,y);
+			g.setActiveRole(Board.Role.ALICE);
+		}
+		redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
+		return;
 	}
 
 }
