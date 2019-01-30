@@ -93,6 +93,7 @@ public class AIPlayer implements java.io.Serializable {
 
 	private Point getBestPoint() {
 		TreeMap<Integer, Point> scoresMap = new TreeMap<Integer, Point>(Collections.reverseOrder());
+		LOGGER.info("=================== Start of Analysis ===================");
 		// go through all empty nodes and calculate score for each one of them, return
 		// the highest score point in the end.
 		for (int x = range.startX; x <= range.endX; x++)
@@ -112,6 +113,7 @@ public class AIPlayer implements java.io.Serializable {
 				}
 			}
 		LOGGER.info(String.format("return best point with score %d at %s", scoresMap.firstEntry().getKey(), scoresMap.firstEntry().getValue()));
+		LOGGER.info("=================== Stop of Analysis ===================");
 		return scoresMap.firstEntry().getValue();
 	}
 
@@ -227,7 +229,7 @@ public class AIPlayer implements java.io.Serializable {
 		// check backward
 		x = X;
 		y = Y;
-		while (y < range.startY && x > range.startX && m == boardTable[--x][--y])
+		while (y > range.startY && x > range.startX && m == boardTable[--x][--y])
 			count++;
 		if (X == 0 || Y == 0)
 			bLive = false;
