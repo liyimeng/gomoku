@@ -121,18 +121,24 @@ public class AIPlayer implements java.io.Serializable {
 		// Horizon -
 		// check forward
 		x = X;
-		fLive = bLive = false;
 		while (x < range.endX && m == boardTable[++x][Y])
 			count++;
-		if (x < b.getMaxX() )
-			fLive = (boardTable[x][Y] == Marker.EMPTY);
+		if (X == b.getMaxX() - 1) {
+			fLive = false;
+		}else {
+			fLive = (boardTable[x][Y] == Marker.EMPTY);			
+		}
 		// check backward
 		x = X;
 		while (x > range.startX && m == boardTable[--x][Y])
 			count++;
-		if (x >= 0)
-			bLive = (boardTable[x][Y] == Marker.EMPTY);
 
+		if (X == 0) {
+			bLive = false;
+		}else {
+			bLive = (boardTable[x][Y] == Marker.EMPTY);			
+		}
+		
 		if (count >= b.getMatchPoint())
 			return MatchPointScore;
 		else {
@@ -147,17 +153,21 @@ public class AIPlayer implements java.io.Serializable {
 		count = 1;
 		// check forward
 		y = Y;
-		fLive = bLive = false;
 		while (y < range.endY && m == boardTable[X][++y])
 			count++;
-		if (y < b.getMaxY() )
+		if (Y == b.getMaxY() - 1) 
+			fLive =false;
+		else 
 			fLive = (boardTable[X][y] == Marker.EMPTY);
 		// check backward
 		y = Y;
 		while (y > range.startY && m == boardTable[X][--y])
 			count++;
-		if (y >= 0)
-			bLive = (boardTable[X][y] == Marker.EMPTY);
+		if (Y == 0) {
+			bLive = false;
+		}else {
+			bLive = (boardTable[X][y] == Marker.EMPTY);			
+		}
 
 		if (count >= b.getMatchPoint())
 			return MatchPointScore;
@@ -175,17 +185,20 @@ public class AIPlayer implements java.io.Serializable {
 		// check forward
 		x = X;
 		y = Y;
-		fLive = bLive = false;
 		while (x < range.endX && y > range.startY && m == boardTable[++x][--y])
 			count++;
-		if (x < b.getMaxX()  && y >= 0)
+		if (X == b.getMaxX()-1  || Y == 0) {
+			fLive = false;
+		}else
 			fLive = (boardTable[x][y] == Marker.EMPTY);
 		// check backward
 		x = X;
 		y = Y;
 		while (y < range.endY && x > range.startX && m == boardTable[--x][++y])
 			count++;
-		if (x >= 0 && y < b.getMaxY() )
+		if (X == 0 || Y == b.getMaxY() -1 )
+			bLive = false;
+		else
 			bLive = (boardTable[x][y] == Marker.EMPTY);
 
 		if (count >= b.getMatchPoint())
@@ -207,14 +220,18 @@ public class AIPlayer implements java.io.Serializable {
 		fLive = bLive = false;
 		while (x < range.endX && y < range.endY && m == boardTable[++x][++y])
 			count++;
-		if (x < b.getMaxX()  && y < b.getMaxY() )
+		if (X == b.getMaxX() - 1  ||  Y ==  b.getMaxY() - 1 )
+			fLive = false;
+		else
 			fLive = (boardTable[x][y] == Marker.EMPTY);
 		// check backward
 		x = X;
 		y = Y;
 		while (y < range.startY && x > range.startX && m == boardTable[--x][--y])
 			count++;
-		if (x >= 0 && y >= 0)
+		if (X == 0 || Y == 0)
+			bLive = false;
+		else
 			bLive = (boardTable[x][y] == Marker.EMPTY);
 
 		if (count >= b.getMatchPoint())
