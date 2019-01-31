@@ -2,6 +2,7 @@ package goinrow;
 
 import java.util.Collections;
 import java.util.TreeMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,15 +17,15 @@ public class AIPlayer implements java.io.Serializable {
 	final private int MatchPointScore;
 	final private Board b;
 	final private SearchRange range;
-	final private Player.Role[][] boardTable;
+	final private Role[][] boardTable;
 
 	public AIPlayer(Board b) {
 		this.b = b;
-		MatchPointScore = 8 << b.getMatchPoint();
-		boardTable = new Player.Role[b.getMaxX()][b.getMaxY()];
-		for (int i = 0; i < b.getMaxX(); i++)
-			for (int j = 0; j < b.getMaxY(); j++)
-				boardTable[i][j] = Player.Role.EMPTY;
+		MatchPointScore = 8 << b.matchPoint;
+		boardTable = new Role[b.maxX][b.maxY];
+		for (int i = 0; i < b.maxX; i++)
+			for (int j = 0; j < b.maxY; j++)
+				boardTable[i][j] = Role.EMPTY;
 		range = new SearchRange();
 
 	}
@@ -63,31 +64,31 @@ public class AIPlayer implements java.io.Serializable {
 				startX = 0;
 			if (startY < 0)
 				startY = 0;
-			if (endX >= b.getMaxX())
-				endX = b.getMaxX() - 1;
-			if (endY >= b.getMaxY())
-				endY = b.getMaxY() - 1;
+			if (endX >= b.maxX)
+				endX = b.maxX - 1;
+			if (endY >= b.maxY)
+				endY = b.maxY - 1;
 			LOGGER.info(String.format("Current range is: startX=%d, startY=%d; endX=%d, endY=%d", startX, startY, endX,
 					endY));
 		}
 	}
 
 	public void runFirst() {
-		int x = b.getMaxX() / 2;
-		int y = b.getMaxY() / 2;
+		int x = b.maxX / 2 + ThreadLocalRandom.current().nextInt(-2, 2);
+		int y = b.maxY / 2 + ThreadLocalRandom.current().nextInt(-2, 2);
 		this.range.reshape(x, y);
-		if (b.play(x, y, Player.Role.GUEST))
-			boardTable[x][y] = Player.Role.GUEST;
+		if (b.play(x, y, Role.GUEST))
+			boardTable[x][y] = Role.GUEST;
 		return;
 	}
 
 	// Play our turn against opponent, who just play at (x,y), note AIPlayer is always play as guest.
 	public void runAgainst(int x, int y) {
 		this.range.reshape(x, y);
-		boardTable[x][y] = Player.Role.HOST;
+		boardTable[x][y] = Role.HOST;
 		Point p = getBestPoint();
-		if (b.play(p.x, p.y, Player.Role.GUEST))
-			boardTable[p.x][p.y] = Player.Role.GUEST;
+		if (b.play(p.x, p.y, Role.GUEST))
+			boardTable[p.x][p.y] = Role.GUEST;
 		range.reshape(p.x, p.y);
 		return;
 	}
@@ -99,26 +100,29 @@ public class AIPlayer implements java.io.Serializable {
 		// the highest score point in the end.
 		for (int x = range.startX; x <= range.endX; x++)
 			for (int y = range.startY; y <= range.endY; y++) {
-				if (boardTable[x][y] == Player.Role.EMPTY) {
-					int myScore = countScore(x, y, Player.Role.GUEST);
+				if (boardTable[x][y] == Role.EMPTY) {
+					int myScore = countScore(x, y, Role.GUEST);
 					if (myScore >= MatchPointScore) { // Find a match point!
 						return new Point(x, y); // Play and win!
 					}
 
-					int opScore = countScore(x, y, Player.Role.HOST);
+					int opScore = countScore(x, y, Role.HOST);
 					if (opScore >= MatchPointScore) { // Find a match point!, but it below to enemy :(
 						return new Point(x, y); // play to avoid lost!
 					}
 					scoresMap.put(myScore + opScore, new Point(x, y));
+					if (scoresMap.size() > 10) { // We only keep top ten best result for further analysis to save memory.
+						scoresMap.remove(scoresMap.lastEntry().getKey());
+					}
 					LOGGER.log(Level.FINE, String.format("myScore %d opScore %d at %d, %d", myScore, opScore, x, y));
 				}
 			}
 		LOGGER.info(String.format("return best point with score %d at %s", scoresMap.firstEntry().getKey(), scoresMap.firstEntry().getValue()));
 		LOGGER.info("=================== Stop of Analysis ===================");
-		return scoresMap.firstEntry().getValue();
+		return scoresMap.firstEntry().getValue(); //No additional analysis, just return the highest scored one.
 	}
 
-	private int countScore(int X, int Y, Player.Role m) {
+	private int countScore(int X, int Y, Role m) {
 		int x = 0, y = 0, count = 1, score = 0;
 		boolean fLive, bLive;
 		// Horizon -
@@ -126,10 +130,10 @@ public class AIPlayer implements java.io.Serializable {
 		x = X;
 		while (x < range.endX && m == boardTable[++x][Y])
 			count++;
-		if (X == b.getMaxX() - 1) {
+		if (X == b.maxX - 1) {
 			fLive = false;
 		}else {
-			fLive = (boardTable[x][Y] == Player.Role.EMPTY);			
+			fLive = (boardTable[x][Y] == Role.EMPTY);			
 		}
 		// check backward
 		x = X;
@@ -139,10 +143,10 @@ public class AIPlayer implements java.io.Serializable {
 		if (X == 0) {
 			bLive = false;
 		}else {
-			bLive = (boardTable[x][Y] == Player.Role.EMPTY);			
+			bLive = (boardTable[x][Y] == Role.EMPTY);			
 		}
 		
-		if (count >= b.getMatchPoint())
+		if (count >= b.matchPoint)
 			return MatchPointScore;
 		else {
 			if (fLive && bLive) {
@@ -158,10 +162,10 @@ public class AIPlayer implements java.io.Serializable {
 		y = Y;
 		while (y < range.endY && m == boardTable[X][++y])
 			count++;
-		if (Y == b.getMaxY() - 1) 
+		if (Y == b.maxY - 1) 
 			fLive =false;
 		else 
-			fLive = (boardTable[X][y] == Player.Role.EMPTY);
+			fLive = (boardTable[X][y] == Role.EMPTY);
 		// check backward
 		y = Y;
 		while (y > range.startY && m == boardTable[X][--y])
@@ -169,10 +173,10 @@ public class AIPlayer implements java.io.Serializable {
 		if (Y == 0) {
 			bLive = false;
 		}else {
-			bLive = (boardTable[X][y] == Player.Role.EMPTY);			
+			bLive = (boardTable[X][y] == Role.EMPTY);			
 		}
 
-		if (count >= b.getMatchPoint())
+		if (count >= b.matchPoint)
 			return MatchPointScore;
 		else {
 			if (fLive && bLive) {
@@ -190,21 +194,21 @@ public class AIPlayer implements java.io.Serializable {
 		y = Y;
 		while (x < range.endX && y > range.startY && m == boardTable[++x][--y])
 			count++;
-		if (X == b.getMaxX()-1  || Y == 0) {
+		if (X == b.maxX-1  || Y == 0) {
 			fLive = false;
 		}else
-			fLive = (boardTable[x][y] == Player.Role.EMPTY);
+			fLive = (boardTable[x][y] == Role.EMPTY);
 		// check backward
 		x = X;
 		y = Y;
 		while (y < range.endY && x > range.startX && m == boardTable[--x][++y])
 			count++;
-		if (X == 0 || Y == b.getMaxY() -1 )
+		if (X == 0 || Y == b.maxY -1 )
 			bLive = false;
 		else
-			bLive = (boardTable[x][y] == Player.Role.EMPTY);
+			bLive = (boardTable[x][y] == Role.EMPTY);
 
-		if (count >= b.getMatchPoint())
+		if (count >= b.matchPoint)
 			return MatchPointScore;
 		else {
 			if (fLive && bLive) {
@@ -223,10 +227,10 @@ public class AIPlayer implements java.io.Serializable {
 		fLive = bLive = false;
 		while (x < range.endX && y < range.endY && m == boardTable[++x][++y])
 			count++;
-		if (X == b.getMaxX() - 1  ||  Y ==  b.getMaxY() - 1 )
+		if (X == b.maxX - 1  ||  Y ==  b.maxY - 1 )
 			fLive = false;
 		else
-			fLive = (boardTable[x][y] == Player.Role.EMPTY);
+			fLive = (boardTable[x][y] == Role.EMPTY);
 		// check backward
 		x = X;
 		y = Y;
@@ -235,9 +239,9 @@ public class AIPlayer implements java.io.Serializable {
 		if (X == 0 || Y == 0)
 			bLive = false;
 		else
-			bLive = (boardTable[x][y] == Player.Role.EMPTY);
+			bLive = (boardTable[x][y] == Role.EMPTY);
 
-		if (count >= b.getMatchPoint())
+		if (count >= b.matchPoint)
 			return MatchPointScore;
 		else {
 			if (fLive && bLive) {

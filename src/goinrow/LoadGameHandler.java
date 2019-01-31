@@ -34,7 +34,7 @@ public class LoadGameHandler extends GameHandler {
 			return;
 		}
 
-		Player.Role player = auth(g, params, response);
+		Role player = auth(g, params, response);
 		if (player == null)
 			return;
 

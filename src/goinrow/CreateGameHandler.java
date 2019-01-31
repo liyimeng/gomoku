@@ -43,6 +43,8 @@ public class CreateGameHandler extends GameHandler {
 			}
 			if (K < 3)
 				K = 3;
+			if (K > 10)
+				K = 10;
 			if (X < K + 3)
 				X = K + 3;
 
@@ -50,16 +52,19 @@ public class CreateGameHandler extends GameHandler {
 				Y = K + 3;
 			Board b = new Board(X, Y, K);
 			Game g;
-			Player.Role active = Player.Role.HOST;
-			if (Player.Role.GUEST.getName().equals(params.get("first"))) {
-				active = Player.Role.GUEST;
+			Role active = Role.HOST;
+			if (Role.GUEST.getName().equals(params.get("first"))) {
+				active = Role.GUEST;
 			}
 			if (params.get("opponent").equals("computer")) {
 				g = new Game(Game.Mode.COMPUTER, b, params.get("desc"));
 				allGames.put(g.getID(), g);
-				g.setActiveRole(active);
+				if (active == Role.GUEST) {
+					g.getAIPlayer().runFirst();
+				}
+				g.setActiveRole(Role.HOST);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
-						Player.Role.HOST.getName(), 
+						Role.HOST.getName(), 
 						g.getHostToken()) ;
 				redirectTo(response, url );
 				return;
@@ -68,8 +73,8 @@ public class CreateGameHandler extends GameHandler {
 				g.setActiveRole(active);
 				allGames.put(g.getID(), g);
 				String links = String.format("Game created.<a href=/load?g=%s&r=%s&t=%s>Load game</a> <a href=/join?g=%s&r=%s>Invitation</a>",
-						g.getID(), Player.Role.HOST.getName(), g.getHostToken(),
-						g.getID(), Player.Role.GUEST.getName());
+						g.getID(), Role.HOST.getName(), g.getHostToken(),
+						g.getID(), Role.GUEST.getName());
 				response.setStatusCode(HttpStatus.SC_OK);
 				entity = new NStringEntity(String.format(html, links), ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
@@ -79,7 +84,7 @@ public class CreateGameHandler extends GameHandler {
 				allGames.put(g.getID(), g);
 				g.setActiveRole(active);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
-						Player.Role.HOST.getName(), 
+						Role.HOST.getName(), 
 						g.getHostToken()) ;
 				redirectTo(response, url );
 				return;

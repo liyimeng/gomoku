@@ -72,14 +72,14 @@ public abstract class  GameHandler implements HttpAsyncRequestHandler<HttpReques
 		response.setHeader("Location", url);
 	} 
 	
-	public Player.Role auth(final Game g, final Map<String, String> params, final HttpResponse response) {
-		Player.Role player = null;
-		if (Player.Role.HOST.getName().equals(params.get("r"))) {
+	public Role auth(final Game g, final Map<String, String> params, final HttpResponse response) {
+		Role player = null;
+		if (Role.HOST.getName().equals(params.get("r"))) {
 			if (g.getHostToken().equals(params.get("t")))
-				player = Player.Role.HOST;
+				player = Role.HOST;
 		}else {
 			if (g.getGuestToken().equals(params.get("t")))
-				player = Player.Role.GUEST;					
+				player = Role.GUEST;					
 		}
 		if (player == null) {
 			response.setStatusCode(HttpStatus.SC_FORBIDDEN);

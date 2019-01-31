@@ -1,10 +1,8 @@
 package goinrow;
 
 import java.io.Serializable;
-
-public class Player implements Serializable {
 	
-	public enum Role {
+	public enum Role implements Serializable {
 		HOST(0), EMPTY(1), GUEST(2);
 		String[] name= {"O", ".", "X"};
 		private final int id;
@@ -17,4 +15,3 @@ public class Player implements Serializable {
 		public int getValue() {return id;}
 	}
 
-}

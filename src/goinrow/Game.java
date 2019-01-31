@@ -10,7 +10,7 @@ public class Game implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 	private Board board;
 	private AIPlayer ai;
-	private Player.Role active;
+	private Role active;
 	private String created;
 	private String desc;
 	private Mode mode;
@@ -64,11 +64,11 @@ public class Game implements java.io.Serializable {
 		guestToken = generateToken();
 		return guestToken;
 	}
-	public void setActiveRole(Player.Role r) {
+	public void setActiveRole(Role r) {
 		this.active = r;
 	}
 	
-	public Player.Role getActiveRole() {
+	public Role getActiveRole() {
 		return active;
 	}
 	String getDesc() {
