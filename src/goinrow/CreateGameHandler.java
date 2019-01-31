@@ -11,7 +11,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
-
+/**
+ * Handling game creation from web browser. 
+ * */
 public class CreateGameHandler extends GameHandler {
 	private final static Logger LOGGER = Logger.getLogger( CreateGameHandler.class.getName());
 

@@ -13,7 +13,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NFileEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
-
+/**
+ * handler for loading static file from server to web broswer. 
+ * */
 public class StaticFileHandler extends GameHandler {
 	private File docRoot;
 	private final static Logger LOGGER = Logger.getLogger( CreateGameHandler.class.getName());

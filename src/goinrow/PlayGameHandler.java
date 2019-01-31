@@ -9,6 +9,8 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
+/**
+ * Handle play action from a player.*/
 
 public class PlayGameHandler extends GameHandler {
 

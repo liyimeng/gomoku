@@ -1,10 +1,10 @@
 package goinrow;
 
+/**
+ * Chess board class.
+ */
 public class Board implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public final  int maxX, maxY, matchPoint;

@@ -3,10 +3,11 @@ package goinrow;
 import java.sql.Timestamp;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Game main class.
+ */
 public class Game implements java.io.Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private Board board;
 	private AIPlayer ai;

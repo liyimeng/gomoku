@@ -1,5 +1,7 @@
 package goinrow;
 
+/**
+ * Base class for handling http request for the games.*/
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;

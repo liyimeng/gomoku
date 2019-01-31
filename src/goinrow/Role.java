@@ -1,7 +1,8 @@
 package goinrow;
 
 import java.io.Serializable;
-	
+	/**
+	 * Player role. EMPTY mean no role defined.*/
 	public enum Role implements Serializable {
 		HOST(0), EMPTY(1), GUEST(2);
 		String[] name= {"O", ".", "X"};

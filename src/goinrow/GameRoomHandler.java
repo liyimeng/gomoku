@@ -9,6 +9,8 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 
+/**
+ * Loading game that is available in game room.*/
 public class GameRoomHandler extends GameHandler {
 
 	private final ConcurrentHashMap<String, Game> allGames;

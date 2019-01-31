@@ -9,7 +9,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
-
+/**
+ * Load game and display it as web page in browser.
+ * */
 public class LoadGameHandler extends GameHandler {
 
 	private final ConcurrentHashMap<String, Game> allGames;

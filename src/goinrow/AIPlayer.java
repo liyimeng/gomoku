@@ -6,11 +6,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
+/**
+ * This class implement an AI player, which can play against human being.
+ */
 public class AIPlayer implements java.io.Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private final static Logger LOGGER = Logger.getLogger(AIPlayer.class.getName());
 	public static final int ExtendedStep = 1;
@@ -30,6 +31,8 @@ public class AIPlayer implements java.io.Serializable {
 
 	}
 
+	/**
+	 * Define the search range.*/
 	private class SearchRange implements java.io.Serializable {
 		/**
 		 * 
@@ -73,6 +76,8 @@ public class AIPlayer implements java.io.Serializable {
 		}
 	}
 
+	/**
+	 * Computer go first.*/
 	public void runFirst() {
 		int x = b.maxX / 2 + ThreadLocalRandom.current().nextInt(-2, 2);
 		int y = b.maxY / 2 + ThreadLocalRandom.current().nextInt(-2, 2);
@@ -92,7 +97,9 @@ public class AIPlayer implements java.io.Serializable {
 		range.reshape(p.x, p.y);
 		return;
 	}
-
+	
+	/**
+	 * find the best point to play.*/
 	private Point getBestPoint() {
 		TreeMap<Integer, Point> scoresMap = new TreeMap<Integer, Point>(Collections.reverseOrder());
 		LOGGER.info("=================== Start of Analysis ===================");
@@ -122,6 +129,8 @@ public class AIPlayer implements java.io.Serializable {
 		return scoresMap.firstEntry().getValue(); //No additional analysis, just return the highest scored one.
 	}
 
+	/**
+	 * Count the score on a give point for a player.*/
 	private int countScore(int X, int Y, Role m) {
 		int x = 0, y = 0, count = 1, score = 0;
 		boolean fLive, bLive;
@@ -255,7 +264,7 @@ public class AIPlayer implements java.io.Serializable {
 		return score;
 	}
 
-	public class Point {
+	private class Point {
 		int x, y;
 
 		public Point(int x, int y) {
