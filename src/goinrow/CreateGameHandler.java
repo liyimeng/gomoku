@@ -50,16 +50,16 @@ public class CreateGameHandler extends GameHandler {
 				Y = K + 3;
 			Board b = new Board(X, Y, K);
 			Game g;
-			Board.Role active = Board.Role.ALICE;
-			if (Board.Role.BOB.getRole().equals(params.get("first"))) {
-				active = Board.Role.BOB;
+			Player.Role active = Player.Role.HOST;
+			if (Player.Role.GUEST.getName().equals(params.get("first"))) {
+				active = Player.Role.GUEST;
 			}
 			if (params.get("opponent").equals("computer")) {
 				g = new Game(Game.Mode.COMPUTER, b, params.get("desc"));
 				allGames.put(g.getID(), g);
 				g.setActiveRole(active);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
-						Board.Role.ALICE.getRole(), 
+						Player.Role.HOST.getName(), 
 						g.getHostToken()) ;
 				redirectTo(response, url );
 				return;
@@ -68,8 +68,8 @@ public class CreateGameHandler extends GameHandler {
 				g.setActiveRole(active);
 				allGames.put(g.getID(), g);
 				String links = String.format("Game created.<a href=/load?g=%s&r=%s&t=%s>Load game</a> <a href=/join?g=%s&r=%s>Invitation</a>",
-						g.getID(), Board.Role.ALICE.getRole(), g.getHostToken(),
-						g.getID(), Board.Role.BOB.getRole());
+						g.getID(), Player.Role.HOST.getName(), g.getHostToken(),
+						g.getID(), Player.Role.GUEST.getName());
 				response.setStatusCode(HttpStatus.SC_OK);
 				entity = new NStringEntity(String.format(html, links), ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
@@ -79,7 +79,7 @@ public class CreateGameHandler extends GameHandler {
 				allGames.put(g.getID(), g);
 				g.setActiveRole(active);
 				String url = String.format("/load?g=%s&r=%s&t=%s", g.getID(), 
-						Board.Role.ALICE.getRole(), 
+						Player.Role.HOST.getName(), 
 						g.getHostToken()) ;
 				redirectTo(response, url );
 				return;

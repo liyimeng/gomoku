@@ -8,17 +8,17 @@ public class Board implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private int maxX, maxY, win;
-	private Role[][] boardTable;
+	private Player.Role[][] boardTable;
 	private boolean hasWinner;
 	public Board(int maxX, int maxY, int win) {
 		this.maxX = maxX;
 		this.maxY = maxY;
 		this.win = win;
 		this.hasWinner = false;
-		this.boardTable = new Role[maxX][maxY];
+		this.boardTable = new Player.Role[maxX][maxY];
 		for (int x = 0; x < maxX; x++) {
 			for (int y = 0; y < maxY; y++) {
-				boardTable[x][y] = Role.EMPTY;
+				boardTable[x][y] = Player.Role.EMPTY;
 			}
 		}
 	}
@@ -35,8 +35,8 @@ public class Board implements java.io.Serializable {
 		return win;
 	}
 	
-	public boolean play(int x, int y, Role m) {
-		if (x < 0 || x > maxX || y < 0 || y > maxY || boardTable[x][y] != Role.EMPTY) {
+	public boolean play(int x, int y, Player.Role m) {
+		if (x < 0 || x > maxX || y < 0 || y > maxY || boardTable[x][y] != Player.Role.EMPTY) {
 			return false;
 		}
 		boardTable[x][y] = m;
@@ -116,7 +116,7 @@ public class Board implements java.io.Serializable {
 		 for (int y=0; y < maxY; y++) {
 			 html += "<tr>";
 			 for (int x = 0 ; x < maxX; x++){
-				 html += "<td>" + boardTable[x][y].getRole()+ "</td>";						 
+				 html += "<td>" + boardTable[x][y].getName()+ "</td>";						 
 			}
 			 html += "</tr>";
 		 }
@@ -124,17 +124,17 @@ public class Board implements java.io.Serializable {
 		 return html;
 	 }
 	
-	 public String renderForPlay(Role r, String gid,String token) {
+	 public String renderForPlay(Player.Role r, String gid,String token) {
 		 String html = "<table>";
 		 String tmp;
 		 
 		  for (int y=0; y < maxY; y++) {
 			 html += "<tr>";
 			 for (int x = 0 ; x < maxX; x++){
-				if (this.boardTable[x][y] == Role.EMPTY) {
-					 tmp = String.format("<td><a href=/play?g=%s&x=%d&y=%d&r=%s&t=%s>.</a></td>", gid, x, y, r.getRole(), token);
+				if (this.boardTable[x][y] == Player.Role.EMPTY) {
+					 tmp = String.format("<td><a href=/play?g=%s&x=%d&y=%d&r=%s&t=%s>.</a></td>", gid, x, y, r.getName(), token);
 				}else {
-					tmp = String.format("<td>%s</td>", boardTable[x][y].getRole());						 
+					tmp = String.format("<td>%s</td>", boardTable[x][y].getName());						 
 				}
 				html += tmp;
 			}
@@ -143,18 +143,4 @@ public class Board implements java.io.Serializable {
 		 html += "</table>";
 		 return html;
 	 }
-	public enum Role {
-		ALICE("O"), BOB("X"), EMPTY(".");
-
-		private String role;
-
-		Role(String r) {
-			this.role = r;
-		}
-
-		public String getRole() {
-			return role;
-		}
-	}
-
 }

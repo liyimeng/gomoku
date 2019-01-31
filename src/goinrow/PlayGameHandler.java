@@ -40,12 +40,12 @@ public class PlayGameHandler extends GameHandler {
 			return;
 		}
 		
-		Board.Role player = auth(g, params, response);
+		Player.Role player = auth(g, params, response);
 		if (player == null )
 			return;
 
 		if (g.getActiveRole() != player) {
-			redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
+			redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getName(), params.get("t")));
 			return;
 		}
 		
@@ -54,10 +54,10 @@ public class PlayGameHandler extends GameHandler {
 			x = Integer.parseInt(params.get("x"));
 			y = Integer.parseInt(params.get("y"));
 			if(g.getBoard().play(x, y, player)){
-				if (player == Board.Role.ALICE) {
-					g.setActiveRole(Board.Role.BOB);
+				if (player == Player.Role.HOST) {
+					g.setActiveRole(Player.Role.GUEST);
 				} else {
-					g.setActiveRole(Board.Role.ALICE);
+					g.setActiveRole(Player.Role.HOST);
 				}
 			}
 		}catch (Exception e) {
@@ -74,9 +74,9 @@ public class PlayGameHandler extends GameHandler {
 		AIPlayer p = g.getAIPlayer();
 		if ( p != null) {
 			p.runAgainst(x,y);
-			g.setActiveRole(Board.Role.ALICE);
+			g.setActiveRole(Player.Role.HOST);
 		}
-		redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getRole(), params.get("t")));
+		redirectTo(response, String.format("/load?g=%s&r=%s&t=%s", g.getID(), player.getName(), params.get("t")));
 		return;
 	}
 

@@ -34,7 +34,7 @@ public class LoadGameHandler extends GameHandler {
 			return;
 		}
 
-		Board.Role player = auth(g, params, response);
+		Player.Role player = auth(g, params, response);
 		if (player == null)
 			return;
 
@@ -50,7 +50,7 @@ public class LoadGameHandler extends GameHandler {
 			if (g.getActiveRole() == player) {
 				response.setStatusCode(HttpStatus.SC_OK);
 				final NStringEntity entity = new NStringEntity(
-						String.format(html, "<title>Your turn</title>", "<h1>It is turn: " + player.getRole() + "</h1>" ,
+						String.format(html, "<title>Your turn</title>", "<h1>It is turn: " + player.getName() + "</h1>" ,
 								g.getBoard().renderForPlay(player, g.getID(), params.get("t"))),
 						ContentType.create("text/html", "UTF-8"));
 				response.setEntity(entity);
