@@ -46,40 +46,39 @@ import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
 /**
- * Simple HTTP/1.1 server based on a non-blocking I/O model and capable
- * of direct channel (zero copy) data transfer.
+ * Simple HTTP/1.1 server based on a non-blocking I/O model and capable of
+ * direct channel (zero copy) data transfer.
  */
 public class GameServer {
-	private final static Logger LOGGER = Logger.getLogger( GameServer.class.getName());
+	private final static Logger LOGGER = Logger.getLogger(GameServer.class.getName());
 	ConcurrentHashMap<String, Game> gameStore;
 	private String docRoot = "./static";
 	private String dbFile = "games.db";
+
 	public static void main(final String[] args) throws Exception {
 		int port = 8080;
 		if (args.length >= 1) {
 			port = Integer.parseInt(args[0]);
 		}
-		
+
 		final GameServer gs = new GameServer();
-		//register a shutdown hook for cleaning up
+		// register a shutdown hook for cleaning up
 		Runtime.getRuntime().addShutdownHook(new Thread() {//
-            public void run() {
-               gs.saveGames();
-            }
-        });
-       gs.start( port );
+			public void run() {
+				gs.saveGames();
+			}
+		});
+		gs.start(port);
 	}
-	
-	
+
 	public GameServer() {
 		// get the global logger to configure it
-        Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-        logger.setLevel(Level.INFO);
+		Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+		logger.setLevel(Level.INFO);
 		loadGames();
 	}
-	
-	protected void saveGames() {
-		LOGGER.info("Save games before jvm shutdown");
+
+	protected synchronized void saveGames() {
 		// Saving of object in a file
 		try {
 			FileOutputStream file;
@@ -97,39 +96,37 @@ public class GameServer {
 		}
 		LOGGER.info("Game saved.");
 	}
-	
+
 	private void loadGames() {
 		LOGGER.info("Load games from disk");
 		// Saving of object in a file
 		try {
-			// Reading the object from a file 
-            FileInputStream file = new FileInputStream(dbFile); 
-            ObjectInputStream in = new ObjectInputStream(file); 
-            // Method for deserialization of object 
-            gameStore = (ConcurrentHashMap<String, Game>)in.readObject(); 
-            in.close(); 
-            file.close(); 
+			// Reading the object from a file
+			FileInputStream file = new FileInputStream(dbFile);
+			ObjectInputStream in = new ObjectInputStream(file);
+			// Method for deserialization of object
+			gameStore = (ConcurrentHashMap<String, Game>) in.readObject();
+			in.close();
+			file.close();
 
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		if (gameStore == null ) {
+		if (gameStore == null) {
 			gameStore = new ConcurrentHashMap<String, Game>();
 		}
 		LOGGER.info("Games have been loaded");
 	}
-	
-	
-	
+
 	public void start(int port) {
 		// Create HTTP protocol processing chain
-		HttpProcessor httpproc = HttpProcessorBuilder.create().add(new ResponseDate())
-				.add(new ResponseServer("Go/1.1")).add(new ResponseContent()).add(new ResponseConnControl()).build();
+		HttpProcessor httpproc = HttpProcessorBuilder.create().add(new ResponseDate()).add(new ResponseServer("Go/1.1"))
+				.add(new ResponseContent()).add(new ResponseConnControl()).build();
 		// Create request handler registry
 		UriHttpAsyncRequestHandlerMapper reqistry = new UriHttpAsyncRequestHandlerMapper();
 		// Register the default handler for all URIs
@@ -155,6 +152,21 @@ public class GameServer {
 			}
 
 		};
+
+		// a dirty hack to save games periodically to avoid losing all data in case of
+		// server crash
+		new Thread() {//
+			public void run() {
+				try {
+					while (true) {
+						Thread.sleep(60000);
+						GameServer.this.saveGames();
+					}
+				} catch (InterruptedException e) {
+				}
+			}
+		}.start();
+		
 		// Create HTTP connection factory
 		NHttpConnectionFactory<DefaultNHttpServerConnection> connFactory;
 
@@ -172,7 +184,7 @@ public class GameServer {
 			LOGGER.info("Server listens at: " + String.valueOf(port));
 			// Ready to go!
 			ioReactor.execute(ioEventDispatch);
-		}  catch (IOException e) {
+		} catch (IOException e) {
 			System.err.println("I/O error: " + e.getMessage());
 		}
 	}
