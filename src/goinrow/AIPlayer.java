@@ -2,6 +2,7 @@ package goinrow;
 
 import java.util.Collections;
 import java.util.TreeMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AIPlayer implements java.io.Serializable {
@@ -109,7 +110,7 @@ public class AIPlayer implements java.io.Serializable {
 						return new Point(x, y); // play to avoid lost!
 					}
 					scoresMap.put(myScore + opScore, new Point(x, y));
-					LOGGER.info(String.format("myScore %d opScore %d at %d, %d", myScore, opScore, x, y));
+					LOGGER.log(Level.FINE, String.format("myScore %d opScore %d at %d, %d", myScore, opScore, x, y));
 				}
 			}
 		LOGGER.info(String.format("return best point with score %d at %s", scoresMap.firstEntry().getKey(), scoresMap.firstEntry().getValue()));
@@ -150,7 +151,7 @@ public class AIPlayer implements java.io.Serializable {
 				score = 1 << (count - 1);
 			}
 		}
-		LOGGER.info(String.format("%s(%d, %d): - c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
+		LOGGER.log(Level.FINE, String.format("%s(%d, %d): -- c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
 		// Vertical |
 		count = 1;
 		// check forward
@@ -180,7 +181,7 @@ public class AIPlayer implements java.io.Serializable {
 				score = score + (1 << (count - 1));
 			}
 		}
-		LOGGER.info(String.format("%s(%d, %d): | c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
+		LOGGER.log(Level.FINE, String.format("%s(%d, %d): | c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
 
 		// Slash /
 		count = 1;
@@ -212,7 +213,7 @@ public class AIPlayer implements java.io.Serializable {
 				score = score + (1 << (count - 1));
 			}
 		}
-		LOGGER.info(String.format("%s(%d, %d): / c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
+		LOGGER.log(Level.FINE, String.format("%s(%d, %d): / c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
 
 		// Back slash \
 		count = 1;
@@ -245,7 +246,7 @@ public class AIPlayer implements java.io.Serializable {
 				score = score + (1 << (count - 1));
 			}
 		}
-		LOGGER.info(String.format("%s(%d, %d): \\ c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
+		LOGGER.log(Level.FINE, String.format("%s(%d, %d): \\ c=%d s=%d fl=%b, bl=%b", m, X, Y, count, score, fLive, bLive));
 
 		return score;
 	}

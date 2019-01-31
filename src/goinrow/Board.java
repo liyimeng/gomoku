@@ -132,7 +132,7 @@ public class Board implements java.io.Serializable {
 			 html += "<tr>";
 			 for (int x = 0 ; x < maxX; x++){
 				if (this.boardTable[x][y] == Player.Role.EMPTY) {
-					 tmp = String.format("<td><a href=/play?g=%s&x=%d&y=%d&r=%s&t=%s>.</a></td>", gid, x, y, r.getName(), token);
+					 tmp = String.format("<td><a href=/play?g=%s&x=%d&y=%d&r=%s&t=%s>%s</a></td>", gid, x, y, r.getName(), token, Player.Role.EMPTY.getName());
 				}else {
 					tmp = String.format("<td>%s</td>", boardTable[x][y].getName());						 
 				}
